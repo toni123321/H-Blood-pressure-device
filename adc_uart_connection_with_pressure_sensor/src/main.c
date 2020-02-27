@@ -15,7 +15,7 @@
 #include <string.h>
 
 
-static GPIO_InitTypeDef  GPIO_LED_Struct;
+static GPIO_InitTypeDef  GPIO_Motor_Struct;
 static GPIO_InitTypeDef  GPIO_Button_Struct;
 
 void clock_init();
@@ -317,11 +317,11 @@ void set_timers_pwm()
 void gpio_init()
 {
 	/* -2- Configure IO in output push-pull mode to drive external LEDs */
-	GPIO_LED_Struct.Mode  = GPIO_MODE_ANALOG;
-	GPIO_LED_Struct.Pull  = GPIO_NOPULL;
+	GPIO_Motor_Struct.Mode  = GPIO_MODE_ANALOG;
+	GPIO_Motor_Struct.Pull  = GPIO_NOPULL;
 
-	GPIO_LED_Struct.Pin = GPIO_PIN_1;
-	HAL_GPIO_Init(GPIOC, &GPIO_LED_Struct);
+	GPIO_Motor_Struct.Pin = GPIO_PIN_1;
+	HAL_GPIO_Init(GPIOC, &GPIO_Motor_Struct);
 
 
 	GPIO_Button_Struct.Mode = GPIO_MODE_INPUT;
