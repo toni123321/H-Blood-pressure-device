@@ -8,14 +8,13 @@
   ******************************************************************************
 */
 
+
 #include "stm32l0xx.h"
 #include "stm32l0xx_nucleo.h"
 #include <stdio.h>
 #include <string.h>
 
 
-static GPIO_InitTypeDef  GPIO_Motor_Struct;
-static GPIO_InitTypeDef  GPIO_Button_Struct;
 
 void clock_init();
 
@@ -41,6 +40,9 @@ void LED_Toggle(int gpio_pin);
 #define  PULSE_VALUE       (uint32_t)(PERIOD_VALUE/2) /* */
 
 #define ADC_CONVERTED_DATA_BUFFER_SIZE   ((uint32_t)  2)   /* Size of array aADCxConvertedData[] */
+
+static GPIO_InitTypeDef  GPIO_Motor_Struct;
+static GPIO_InitTypeDef  GPIO_Button_Struct;
 
 
 TIM_HandleTypeDef    TimHandle;
@@ -92,7 +94,7 @@ int main(void)
 	{
 
 		HAL_ADC_Start(&AdcHandle);
-		HAL_ADC_PollForConversion(&AdcHandle, 5);
+		HAL_ADC_PollForConversion(&AdcHandle, 0);
 
 //		HAL_UART_Transmit(&UartHandle, (uint8_t*)buffer, sprintf(buffer, "%d\r\n", aADCxConvertedData[0]), 500);
 //		aADCxConvertedData[0] = HAL_ADC_GetValue
@@ -104,6 +106,7 @@ int main(void)
 		{
 			button = !button;
 			HAL_Delay(1000);
+
 		}
 
 		if(button)
@@ -265,7 +268,7 @@ void adc_init()
 	AdcHandle.Init.ScanConvMode          = ADC_SCAN_DIRECTION_FORWARD;    /* Sequencer disabled (ADC conversion on only 1 channel: channel set on rank 1) */
 	AdcHandle.Init.LowPowerAutoPowerOff  = DISABLE;
 	AdcHandle.Init.EOCSelection          = ADC_EOC_SINGLE_CONV;           /* EOC flag picked-up to indicate conversion end */
-	AdcHandle.Init.LowPowerFrequencyMode = DISABLE;
+	AdcHandle.Init.LowPowerFrequencyMode = ENABLE;
 	AdcHandle.Init.LowPowerAutoWait      = DISABLE;                       /* Auto-delayed conversion feature disabled */
 	AdcHandle.Init.ContinuousConvMode    = DISABLE;                        /* Continuous mode enabled (automatic conversion restart after each conversion) */
 	AdcHandle.Init.DiscontinuousConvMode = ENABLE;                       /* Parameter discarded because sequencer is disabled */
@@ -274,7 +277,7 @@ void adc_init()
 	AdcHandle.Init.DMAContinuousRequests = DISABLE;                        /* ADC DMA continuous request to match with DMA circular mode */
 	AdcHandle.Init.Overrun               = ADC_OVR_DATA_PRESERVED;      /* DR register is overwritten with the last conversion result in case of overrun */
 	AdcHandle.Init.OversamplingMode      = DISABLE;                       /* No oversampling */
-	AdcHandle.Init.SamplingTime          = ADC_SAMPLETIME_1CYCLE_5;
+	AdcHandle.Init.SamplingTime          = ADC_SAMPLETIME_7CYCLES_5;
 
 	/* Initialize ADC peripheral according to the passed parameters */
 	if (HAL_ADC_Init(&AdcHandle) != HAL_OK)
@@ -283,11 +286,11 @@ void adc_init()
 	}
 
 
-//	/* ### - 2 - Start calibration ############################################ */
-//	if (HAL_ADCEx_Calibration_Start(&AdcHandle, ADC_SINGLE_ENDED) !=  HAL_OK)
-//	{
-//		Error_Handler();
-//	}
+	/* ### - 2 - Start calibration ############################################ */
+	if (HAL_ADCEx_Calibration_Start(&AdcHandle, ADC_SINGLE_ENDED) !=  HAL_OK)
+	{
+		Error_Handler();
+	}
 
 	/* ### - 3 - Channel configuration ######################################## */
 	sConfig.Channel      = ADC_CHANNEL_1;               /* Channel to be converted */
@@ -396,7 +399,6 @@ void gpio_init()
 	//GPIO for LEDS, which indicate battery level
 	GPIO_LED_Struct.Mode = GPIO_MODE_OUTPUT_PP;
 	GPIO_LED_Struct.Pin = GPIO_PIN_3|GPIO_PIN_4 | GPIO_PIN_5;
-	GPIO_LED_Struct.Mode = GPIO_MODE_OUTPUT_PP;
 	GPIO_LED_Struct.Pull = GPIO_NOPULL;
 	GPIO_LED_Struct.Speed = GPIO_SPEED_FREQ_LOW;
 	HAL_GPIO_Init(GPIOB, &GPIO_LED_Struct);
