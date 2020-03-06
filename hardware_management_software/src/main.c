@@ -41,22 +41,20 @@ void LED_Toggle(int gpio_pin);
 
 #define ADC_CONVERTED_DATA_BUFFER_SIZE   ((uint32_t)  2)   /* Size of array aADCxConvertedData[] */
 
-static GPIO_InitTypeDef  GPIO_Motor_Struct;
+static GPIO_InitTypeDef  GPIO_Sensor_Struct;
 static GPIO_InitTypeDef  GPIO_Button_Struct;
-
+static GPIO_InitTypeDef  GPIO_Battery_Struct;
+static GPIO_InitTypeDef GPIO_LED_Struct; // structure for LEDs for indicating battery level
+GPIO_InitTypeDef GPIO_Struct;
+GPIO_InitTypeDef  GPIO_InitStruct;
 
 TIM_HandleTypeDef    TimHandle;
 TIM_OC_InitTypeDef Config;
 
-/* Counter Prescaler value */
-uint32_t uhPrescalerValue = 0;
-
-GPIO_InitTypeDef GPIO_Struct;
-GPIO_InitTypeDef  GPIO_InitStruct;
 UART_HandleTypeDef UartHandle;
 
-static GPIO_InitTypeDef  GPIO_Battery_Struct;
-
+/* Counter Prescaler value */
+uint32_t uhPrescalerValue = 0;
 ADC_HandleTypeDef             AdcHandle;
 
 /* ADC channel configuration structure declaration */
@@ -65,16 +63,14 @@ ADC_ChannelConfTypeDef        sConfig;
 /* Variable containing ADC conversions data */
 static uint16_t   aADCxConvertedData[ADC_CONVERTED_DATA_BUFFER_SIZE];
 
-static GPIO_InitTypeDef GPIO_LED_Struct; // structure for LEDs for indicating battery level
+
 //static GPIO_InitTypeDef GPIO_LED2_Struct; // led 2 for indicating battery level
 //static GPIO_InitTypeDef GPIO_LED3_Struct; // led 3 for indicating battery level
 
 
 int main(void)
 {
-	int j = 0, button = 0;
-	char buffer[16];
-
+//	int j = 0, button = 0;
 	HAL_Init();
 	SystemClock_Config();
 
@@ -90,11 +86,15 @@ int main(void)
 	double medium_battery = 0;
 	double high_battery = 0;
 
+	int button = 0;
+	char buffer[16];
+
+
 	while(1)
 	{
 
 		HAL_ADC_Start(&AdcHandle);
-		HAL_ADC_PollForConversion(&AdcHandle, 0);
+		HAL_ADC_PollForConversion(&AdcHandle, 5);
 
 //		HAL_UART_Transmit(&UartHandle, (uint8_t*)buffer, sprintf(buffer, "%d\r\n", aADCxConvertedData[0]), 500);
 //		aADCxConvertedData[0] = HAL_ADC_GetValue
@@ -119,6 +119,33 @@ int main(void)
 		else
 		{
 			TIM2->CCR1 = (uint32_t)(PERIOD_VALUE*0);
+			battery_voltage = ((aADCxConvertedData[1] * 3.3) / 4095) * 1.41;
+
+			high_battery = 4.2 - (4.2 * 25/100);
+			medium_battery = 4.2 - (4.2 * 50/100);
+			low_battery = 4.2 - (4.2 * 75/100);
+
+
+
+			//statement for battery level
+			if (battery_voltage >= high_battery)
+			{
+				//high
+				LED_Toggle(GPIO_PIN_5);
+			}
+
+			else if (battery_voltage >= medium_battery && battery_voltage < high_battery)
+			{
+				//medium
+				LED_Toggle(GPIO_PIN_4);
+			}
+			else if(battery_voltage >= low_battery && battery_voltage < medium_battery)
+			{
+				//low
+				LED_Toggle(GPIO_PIN_3);
+
+			}
+
 		}
 //
 
@@ -135,35 +162,7 @@ int main(void)
 		HAL_ADC_PollForConversion(&AdcHandle, 5);
 
 		aADCxConvertedData[1] = HAL_ADC_GetValue(&AdcHandle);
-		battery_voltage = ((aADCxConvertedData[1] * 3.3) / 4095) * 1.41;
-
-		high_battery = 4.2 - (4.2 * 25/100);
-		medium_battery = 4.2 - (4.2 * 50/100);
-		low_battery = 4.2 - (4.2 * 75/100);
-
-
-
-		//statement for battery level
-		if (battery_voltage >= high_battery)
-		{
-			//high
-			LED_Toggle(GPIO_PIN_5);
-		}
-
-		else if (battery_voltage >= medium_battery && battery_voltage < high_battery)
-		{
-			//medium
-			LED_Toggle(GPIO_PIN_4);
-		}
-		else if(battery_voltage >= low_battery && battery_voltage < medium_battery)
-		{
-			//low
-			LED_Toggle(GPIO_PIN_3);
-
-		}
-
 	}
-
 
 }
 
@@ -238,8 +237,8 @@ void uart_init()
 	/* UART TX GPIO pin configuration  */
 	GPIO_InitStruct.Pin       = GPIO_PIN_2;
 	GPIO_InitStruct.Mode      = GPIO_MODE_AF_PP;
-	GPIO_InitStruct.Pull      = GPIO_PULLUP;
-	GPIO_InitStruct.Speed     = GPIO_SPEED_FREQ_VERY_HIGH;
+	GPIO_InitStruct.Pull      = GPIO_NOPULL;
+	//GPIO_InitStruct.Speed     = GPIO_SPEED_FREQ_VERY_HIGH;
 	GPIO_InitStruct.Alternate = GPIO_AF4_USART2;
 	HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
@@ -378,11 +377,11 @@ void set_timers_pwm()
 void gpio_init()
 {
 	/* -2- Configure IO in output push-pull mode to drive external LEDs */
-	GPIO_Motor_Struct.Mode  = GPIO_MODE_ANALOG;
-	GPIO_Motor_Struct.Pull  = GPIO_NOPULL;
+	GPIO_Sensor_Struct.Mode  = GPIO_MODE_ANALOG;
+	GPIO_Sensor_Struct.Pull  = GPIO_NOPULL;
 
-	GPIO_Motor_Struct.Pin = GPIO_PIN_1;
-	HAL_GPIO_Init(GPIOC, &GPIO_Motor_Struct);
+	GPIO_Sensor_Struct.Pin = GPIO_PIN_1;
+	HAL_GPIO_Init(GPIOC, &GPIO_Sensor_Struct);
 
 
 	//GPIO battery initialization -> PA4 pin on the board
