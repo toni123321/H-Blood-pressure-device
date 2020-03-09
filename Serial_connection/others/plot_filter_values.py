@@ -49,6 +49,6 @@ filter_pressure = filtfilt(b, a, y, x)
 
 
 
-plt.plot(filter_pressure, marker='o')    
+plt.plot(, marker='o')    
 plt.show()
 

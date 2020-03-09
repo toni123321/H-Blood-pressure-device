@@ -42,7 +42,7 @@ st = 1; en = length(raw);
 
 
 
-
+plot(raw(st:en, 2))
 
 
 
@@ -68,9 +68,9 @@ end
 % there must be at least 10 values between 2 consecutive intercepts
 intercepts = intercepts(2:end)';
 
-plot(usable)
-hold on
-scatter(intercepts, usable(intercepts))
+%plot(usable)
+%hold on
+%scatter(intercepts, usable(intercepts))
 
 %%
 
@@ -127,12 +127,12 @@ while min(data)<0
     data(xMin) = 0;
 end
 
-hold on
-scatter(minima,usable(minima))
-plot(1:length(usable),spl)
+%hold on
+%scatter(minima,usable(minima))
+%plot(1:length(usable),spl)
 
-figure
-plot(data)
+%figure
+%plot(data)
 
 %dlmwrite('20190121094508edited.txt',data,'delimiter','\n');
 
@@ -162,8 +162,8 @@ end
 maxima = maxima(2:end)';
 
 
-hold on
-scatter(maxima,data(maxima))
+%hold on
+%scatter(maxima,data(maxima))
 
 % for i=1:length(maxima)-1 % not needed
 %     means(i,2) = mean(data(maxima(i):maxima(i+1)));
