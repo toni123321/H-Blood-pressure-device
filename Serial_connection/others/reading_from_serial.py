@@ -56,11 +56,17 @@ def get_data_from_device (com_port):
 
 
 def save_values (filename, time_values, pressure_values):
-    with open(filename + ".csv", "w") as f:
-        writer = csv.writer(f,delimiter=",")
-        writer.writerow(["Time", "Values"])
-        for i in range (len (time_values)-1):
-            writer.writerow([time_values[i], pressure_values[i]])     
+#     with open(filename + ".csv", "w") as f:
+#         writer = csv.writer(f,delimiter=",")
+#         writer.writerow(["Time", "Values"])
+#         for i in range (len (time_values)-1):
+#             writer.writerow([time_values[i], pressure_values[i]])     
+#     
+#     
+    f = open(filename + ".csv", "w")
+    f.write("Times" + ", " + "Values")
+    for i in range (len (time_values)-1):
+        f.write(str(time_values[i]) +  ", " + str(pressure_values[i]))     
     f.close()          
     
 
@@ -118,30 +124,35 @@ def last_file():
     
 def main():
     if len(sys.argv) == 2:
-        if sys.argv[1] == "read":
-            filename = last_file()
-            print(filename)
-            #time_values, pressure_values = load_values (filename)
-            
-            name = filename
-            # start matlab function
-            [output1, output2, output3] = eng.main2(name,nargout=3)
-            print("{}/{}".format(int(output1), int(output3)))
-            
-        else: 
             filename = sys.argv[1]
             time_values, pressure_values = load_values (filename)
             
             name = filename
+        
             # start matlab function
-            [output1, output2, output3] = eng.main2(name,nargout=3)
-            print("{}/{}".format(int(output1), int(output3)))
+            [output1, output2, output3, output4] = eng.data_processing(name,nargout=4)
+            print("{}/{}, MAP={}, pulse={}".format(int(output1), int(output3), int(output2), int(output4)))
+    
+            
+
+#             filename = sys.argv[1]
+#             time_values, pressure_values = load_values (filename)
+#             
+#             name = filename
+#             # start matlab function
+#             [output1, output2, output3] = eng.main2(name,nargout=3)
+#             print("{}/{}".format(int(output1), int(output3)))
     else:
         time_values, pressure_values = get_data_from_device ('COM3')
         
         filename = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
         
         save_values (filename, time_values, pressure_values)
+        name = filename + '.csv'
+        
+        # start matlab function
+        [output1, output2, output3, output4] = eng.data_processing(name,nargout=3)
+        print("{}/{}, MAP={}, pulse={}".format(int(output1), int(output3), int(output2), int(output4)))
         
 #     
 #         
