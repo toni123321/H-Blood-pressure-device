@@ -13,41 +13,38 @@ import matlab.engine
 from test.test_decimal import file
 
 def get_data_from_device (com_port):
-    print("Start measurement now")
-    ser = serial.Serial('COM3')
-    ser.flushInput()
-
-    time_values = []
-    pressure_values = []
+        print("Start measurement now")
+        ser = serial.Serial('COM3')
+        ser.flushInput()
     
-    over_max_pressure_count = 0
-
-    i = 0
-    while True:
-        ser_bytes = ser.readline()
-        pressure = float(ser_bytes[:len(ser_bytes)-2].decode("utf-8")) 
-#                 if pressure > 180:
-#                     over_max_pressure_count += 1
-#                     if over_max_pressure_count == 10:
-#                         break
-#                 else:
-#                     over_max_pressure_count = 0
-        time_values.append(time.time())
-        pressure_values.append(int(pressure))
-        if i == 0:
-            start_time = time_values[0]
+        time_values = []
+        pressure_values = []
         
-        time_values[i] = int((time_values[i] - start_time) * 10**3)
-        if time_values[i] >= 19685:
-            break;
-        
-        i+=1
+        over_max_pressure_count = 0
     
-    
-    
-#     for i in range (len (time_values)-1):
-#         time_values[i] = int((time_values[i] - start_time) * 10**3)            
-    return time_values, pressure_values
+        i = 0
+        while True:
+            ser_bytes = ser.readline()
+            pressure = float(ser_bytes[:len(ser_bytes)-2].decode("utf-8")) 
+    #                 if pressure > 180:
+    #                     over_max_pressure_count += 1
+    #                     if over_max_pressure_count == 10:
+    #                         break
+    #                 else:
+    #                     over_max_pressure_count = 0
+            time_values.append(time.time())
+            pressure_values.append(int(pressure))
+            if i == 0:
+                start_time = time_values[0]
+            
+            time_values[i] = int((time_values[i] - start_time) * 10**3)
+            if time_values[i] >= 19685:
+                break;
+            
+            i+=1
+    #     for i in range (len (time_values)-1):
+    #         time_values[i] = int((time_values[i] - start_time) * 10**3)            
+        return time_values, pressure_values
 
 
 def save_values (filename, time_values, pressure_values):
@@ -174,7 +171,7 @@ def main():
         
         date_time = datetime.datetime.now().strftime("%Y/%m/%d-%H:%M:%S")
         #add values to database in order to create a history storage with all data
-        add_measurement(date_time, int(output1), int(output2), int(output3), int(output4))
+        add_measurement(date_time, int(output1), int(output3), int(output2), int(output4))
         
         #print the current result
         print("{}/{}, MAP={}, pulse={}".format(int(output1), int(output3), int(output2), int(output4)))
