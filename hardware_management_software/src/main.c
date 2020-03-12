@@ -32,8 +32,6 @@ void gpio_init();
 
 void uart_init();
 
-void gpio_init();
-
 void LED_Toggle(int gpio_pin);
 
 #define  PERIOD_VALUE       (uint32_t)(20000 - 1) /*  */
@@ -89,7 +87,7 @@ int main(void)
 	int button = 0;
 	char buffer[16];
 
-
+	int i = 0;
 	while(1)
 	{
 
@@ -121,31 +119,41 @@ int main(void)
 			TIM2->CCR1 = (uint32_t)(PERIOD_VALUE*0);
 			battery_voltage = ((aADCxConvertedData[1] * 3.3) / 4095) * 1.41;
 
-			high_battery = 4.2 - (4.2 * 25/100);
-			medium_battery = 4.2 - (4.2 * 50/100);
-			low_battery = 4.2 - (4.2 * 75/100);
+			// 2.7 - 4.2 V
 
 
+			double battery_range = 4.2 - 2.7;
+			high_battery = 2.7 + (battery_range * 75/100);
+			medium_battery = 2.7 + (battery_range * 50/100);
+			low_battery = 2.7 + (battery_range * 20/100);
 
-			//statement for battery level
-			if (battery_voltage >= high_battery)
+
+			if(i>=1)
 			{
-				//high
-				LED_Toggle(GPIO_PIN_5);
-			}
+				//statement for battery level
+				if (battery_voltage >= high_battery)
+				{
+					//high
+					LED_Toggle(GPIO_PIN_5);
+				}
 
-			else if (battery_voltage >= medium_battery && battery_voltage < high_battery)
-			{
-				//medium
-				LED_Toggle(GPIO_PIN_4);
-			}
-			else if(battery_voltage >= low_battery && battery_voltage < medium_battery)
-			{
-				//low
-				LED_Toggle(GPIO_PIN_3);
+				else if (battery_voltage >= medium_battery && battery_voltage < high_battery)
+				{
+					//medium
+					LED_Toggle(GPIO_PIN_4);
+				}
+				else if(battery_voltage >= low_battery && battery_voltage < medium_battery)
+				{
+					//low
+					LED_Toggle(GPIO_PIN_3);
 
+				}
+				else if(battery_voltage >=2.7 && battery_voltage < low_battery)
+				{
+					HAL_GPIO_WritePin(GPIOB, GPIO_PIN_3, GPIO_PIN_SET);
+				}
 			}
-
+			i++;
 		}
 //
 
@@ -264,7 +272,7 @@ void adc_init()
 
 	AdcHandle.Init.Resolution            = ADC_RESOLUTION_12B;            /* 12-bit resolution for converted data */
 	AdcHandle.Init.DataAlign             = ADC_DATAALIGN_RIGHT;           /* Right-alignment for converted data */
-	AdcHandle.Init.ScanConvMode          = ADC_SCAN_DIRECTION_FORWARD;    /* Sequencer disabled (ADC conversion on only 1 channel: channel set on rank 1) */
+	AdcHandle.Init.ScanConvMode          = ADC_SCAN_DIRECTION_FORWARD;    /* Sequencer disabled if (ADC conversion on only 1 channel: channel set on rank 1) */
 	AdcHandle.Init.LowPowerAutoPowerOff  = DISABLE;
 	AdcHandle.Init.EOCSelection          = ADC_EOC_SINGLE_CONV;           /* EOC flag picked-up to indicate conversion end */
 	AdcHandle.Init.LowPowerFrequencyMode = ENABLE;
