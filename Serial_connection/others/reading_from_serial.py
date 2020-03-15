@@ -38,7 +38,7 @@ def get_data_from_device (com_port):
                 start_time = time_values[0]
             
             time_values[i] = int((time_values[i] - start_time) * 10**3)
-            if time_values[i] >= 19685:
+            if time_values[i] >= 19685 or (pressure_values[i] >= 280 and i>0 and time_values[i] >= 19200):
                 break;
             
             i+=1
@@ -141,6 +141,10 @@ def last_file():
     
     
 def main():
+     # start matlab engine
+    eng = matlab.engine.connect_matlab('my_engine')
+    
+    
     if not os.path.isfile ('data.db'): create_db ()
     #get a result from a given file
     if len(sys.argv) == 2:
@@ -162,9 +166,6 @@ def main():
         save_values ("data", time_values, pressure_values)
         save_values (filename, time_values, pressure_values)
         name = "data.csv"
-        
-        # start matlab engine
-        eng = matlab.engine.connect_matlab('my_engine')
         
         #invoke matlab function for processing input data
         [output1, output2, output3, output4] = eng.data_processing(name,nargout=4)

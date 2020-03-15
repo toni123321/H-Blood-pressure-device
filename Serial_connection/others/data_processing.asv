@@ -134,7 +134,7 @@ end
 
 % make a more precise iSP 
 % using the same idea as with iDP the formula should be:
-% xM = xA+(xB-xA)*(yA-yM)/(yA-yB)
+% xC = xA+(yA-yC)*(xB-xA)/(yA-yB)
 iSP = round(max_indexes(iSP)+(data(max_indexes(iSP))-cs*maxA)*(max_indexes(iSP+1)-max_indexes(iSP))/(data(max_indexes(iSP))-data(max_indexes(iSP+1))));
 
 
