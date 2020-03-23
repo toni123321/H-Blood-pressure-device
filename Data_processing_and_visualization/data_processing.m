@@ -101,7 +101,7 @@ excluded_data = floor(length(data)*0.1);
 imaxA = imaxA+excluded_data;
 
 % calculating the MAP(Mean Arterial Pressure) from imaxA
-MAP = input_data(imaxA+st_pos-1,2);
+MAP = input_data(imaxA+st_pos-1,2)*0.85;
 
 % finding the index of the DAP(Diastolic Arterial Pressure)
 % find the first value, which is above the threshold - this value
@@ -119,10 +119,10 @@ end
 % find the abscissa cooridinates of M
 % x - indexes, y - pressure values
 % xM = xA + (xB-xA)*(yM-yA)/(yB-yA)
-iDP = round(max_indexes(iDP-1)+(maxA*cd-data(max_indexes(iDP-1)))*(max_indexes(iDP)-max_indexes(iDP-1))/(data(max_indexes(iDP))-data(max_indexes(iDP-1))));
+iDP = abs(round(max_indexes(iDP-1)+(maxA*cd-data(max_indexes(iDP-1)))*(max_indexes(iDP)-max_indexes(iDP-1))/(data(max_indexes(iDP))-data(max_indexes(iDP-1)))));
 
 % iDP+st_pos-1 is the index of the DP
-DP = input_data(iDP+st_pos-1,2);
+DP = input_data(iDP+st_pos-1,2)*0.71;
 
 % finding the index of the SAP(Systolic Arterial Pressure)
 % find the first value, which is above the threshold - this value
@@ -139,31 +139,31 @@ iSP = round(max_indexes(iSP)+(data(max_indexes(iSP))-cs*maxA)*(max_indexes(iSP+1
 
 
 % iSP+st_pos-1 is the index of the SP
-SP = input_data(iSP+st_pos-1,2);
+SP = input_data(iSP+st_pos-1,2)*0.9;
 
 %Calculating pulse
 
-start_value = round(length(input_data(st_pos:end_pos, 1)) * 40/100);
+start_value = round(length(input_data(st_pos:end_pos, 1)) * 50/100);
 
-end_value = round(length(input_data(st_pos:end_pos, 1)) * 85/100);
+end_value = round(length(input_data(st_pos:end_pos, 1)) * 80/100);
 
 num_1 = 0;
 num_n = 0;
 t1 = 0;
-for i=1:length(min_indexes)-1
-    if min_indexes(i) >= start_value
+for i=1:length(max_indexes)-1
+    if max_indexes(i) >= start_value
         num_1 = i;
-        t1_index = min_indexes(i);
+        t1_index = max_indexes(i);
         t1 = input_data(t1_index, 1);
         break;
     end
 end
 
 tn = 0;
-for i=1:length(min_indexes)-1
-    if min_indexes(i) >= end_value
+for i=1:length(max_indexes)-1
+    if max_indexes(i) >= end_value
         num_n = i;
-        tn_index = min_indexes(i);
+        tn_index = max_indexes(i-1);
         tn = input_data(tn_index, 1);
         break;
     end 
